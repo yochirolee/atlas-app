@@ -9,7 +9,7 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { CameraView } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
@@ -38,6 +38,8 @@ export default function Proof() {
   const [isTakingPhoto, setIsTakingPhoto] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showCamera, setShowCamera] = useState(true);
+  const [cameraReady, setCameraReady] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView>(null);
   const takingPhotoRef = useRef(false);
   const savingRef = useRef(false);
@@ -81,6 +83,10 @@ export default function Proof() {
     }
   }, []);
 
+  useEffect(() => {
+    if (showCamera) setCameraReady(false);
+  }, [showCamera]);
+
   const handleGetLocation = async (silent = false) => {
     setIsLocating(true);
     try {
@@ -100,7 +106,7 @@ export default function Proof() {
   };
 
   const handleTakePhoto = async () => {
-    if (!cameraRef.current || takingPhotoRef.current) return;
+    if (!cameraRef.current || takingPhotoRef.current || !cameraReady) return;
     takingPhotoRef.current = true;
     setIsTakingPhoto(true);
     try {
@@ -113,7 +119,8 @@ export default function Proof() {
         await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch (e) {
-      alert('Error taking photo');
+      console.error('takePictureAsync failed:', e);
+      alert('Error taking photo. Wait for the camera preview, then try again.');
     } finally {
       takingPhotoRef.current = false;
       setIsTakingPhoto(false);
@@ -158,6 +165,26 @@ export default function Proof() {
     }
   };
 
+  if (!permission) {
+    return <View style={styles.container} />;
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={[styles.container, styles.permWrap, { paddingTop: insets.top + 24 }]}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.permContent}>
+          <Ionicons name="camera-outline" size={48} color="#fff" />
+          <Text style={styles.permTitle}>Camera access required</Text>
+          <Text style={styles.permSub}>Allow camera access to capture delivery proof photos.</Text>
+          <TouchableOpacity style={styles.permBtn} onPress={requestPermission}>
+            <Text style={styles.permBtnText}>Allow Camera</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -168,6 +195,12 @@ export default function Proof() {
             ref={cameraRef}
             style={styles.camera}
             facing="back"
+            mode="picture"
+            onCameraReady={() => setCameraReady(true)}
+            onMountError={({ message }) => {
+              console.error('Camera mount error:', message);
+              alert(`Camera error: ${message}`);
+            }}
           />
 
           <View style={styles.cameraOverlay} pointerEvents="none">
@@ -197,11 +230,19 @@ export default function Proof() {
           </View>
 
           <TouchableOpacity 
-            style={[styles.shutterBtn, { bottom: insets.bottom + 40 }]} 
+            style={[
+              styles.shutterBtn,
+              { bottom: insets.bottom + 40 },
+              (!cameraReady || isTakingPhoto) && { opacity: 0.5 },
+            ]} 
             onPress={handleTakePhoto}
-            disabled={isTakingPhoto}
+            disabled={isTakingPhoto || !cameraReady}
           >
-            <View style={styles.shutterInner} />
+            {isTakingPhoto ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <View style={styles.shutterInner} />
+            )}
           </TouchableOpacity>
         </View>
       ) : (
@@ -311,6 +352,12 @@ export default function Proof() {
 function makeStyles(Colors: AppColors) {
   return StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
+  permWrap: { alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
+  permContent: { alignItems: 'center', gap: 12 },
+  permTitle: { color: '#fff', fontSize: 20, fontWeight: '800', marginTop: 8 },
+  permSub: { color: 'rgba(255,255,255,0.7)', fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  permBtn: { marginTop: 12, backgroundColor: Colors.primary, paddingHorizontal: 24, paddingVertical: 14, borderRadius: 999 },
+  permBtnText: { color: '#fff', fontSize: 15, fontWeight: '700' },
   camera: { flex: 1 },
   cameraOverlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.3)' },
   cameraFrame: { width: '80%', aspectRatio: 3/4, borderWidth: 2, borderColor: 'rgba(255,255,255,0.5)', borderRadius: 20, borderStyle: 'dashed' },

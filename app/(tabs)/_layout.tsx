@@ -1,5 +1,4 @@
 import { Tabs, useRootNavigationState } from 'expo-router';
-import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -23,8 +22,6 @@ export default function TabLayout() {
           backgroundColor: Colors.tabBar,
           borderTopColor: Colors.tabBarBorder,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 68,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 10,
           paddingTop: 8,
           elevation: 0,
           shadowOpacity: 0,

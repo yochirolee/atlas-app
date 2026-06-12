@@ -16,6 +16,7 @@ import {
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Spacing, Radius, Shadows } from "../../constants/theme";
@@ -41,6 +42,7 @@ const SCAN_SIZE = width * 0.6;
 export default function Delivery() {
    const router = useRouter();
    const insets = useSafeAreaInsets();
+   const isFocused = useIsFocused();
    const [permission, requestPermission] = useCameraPermissions();
    const [locPermission, requestLocPermission] = Location.useForegroundPermissions();
 
@@ -200,14 +202,16 @@ export default function Delivery() {
          {/* Flash overlay */}
          <Animated.View pointerEvents="none" style={[styles.flashOverlay, { opacity: flashAnim }]} />
 
-         <CameraView
-            ref={cameraRef}
-            style={styles.camera}
-            facing="back"
-            enableTorch={torch}
-            onBarcodeScanned={handleBarCodeScanned}
-            barcodeScannerSettings={{ barcodeTypes: ["qr", "code128", "code39", "ean13", "pdf417"] }}
-         />
+         {isFocused && (
+            <CameraView
+               ref={cameraRef}
+               style={styles.camera}
+               facing="back"
+               enableTorch={torch}
+               onBarcodeScanned={handleBarCodeScanned}
+               barcodeScannerSettings={{ barcodeTypes: ["qr", "code128", "code39", "ean13", "pdf417"] }}
+            />
+         )}
 
          {/* Overlay */}
          <View style={styles.overlay}>
