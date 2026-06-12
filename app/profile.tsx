@@ -4,11 +4,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../stores/app-store';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, Radius, Shadows } from '../constants/theme';
+import { Spacing, Radius, Shadows, AppColors } from '../constants/theme';
+import { useTheme } from '../hooks/useTheme';
 
 export default function ProfileScreen() {
   const { user, agency } = useAppStore();
   const router = useRouter();
+  const { Colors } = useTheme();
+  const styles = makeStyles(Colors);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -43,7 +46,7 @@ export default function ProfileScreen() {
                 {agency.logo ? (
                   <Image source={{ uri: agency.logo }} style={styles.agencyLogo} resizeMode="contain" />
                 ) : (
-                  <View style={styles.iconWrap}>
+                  <View style={[styles.iconWrap, { backgroundColor: Colors.elevated }]}>
                     <Ionicons name="business" size={24} color={Colors.primary} />
                   </View>
                 )}
@@ -96,7 +99,8 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(Colors: AppColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
@@ -235,3 +239,4 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
 });
+}

@@ -59,3 +59,28 @@ export async function uploadToCloudinary(uri: string, identifier?: string): Prom
     throw err;
   }
 }
+
+/**
+ * Extract public_id from a Cloudinary secure_url.
+ */
+export function getCloudinaryPublicId(url: string): string {
+  try {
+    const parts = url.split('/image/upload/');
+    if (parts.length < 2) {
+      const filename = url.substring(url.lastIndexOf('/') + 1);
+      const dotIdx = filename.lastIndexOf('.');
+      return dotIdx !== -1 ? filename.substring(0, dotIdx) : filename;
+    }
+    const path = parts[1];
+    const cleanPath = path.replace(/^v\d+\//, '');
+    const lastDotIndex = cleanPath.lastIndexOf('.');
+    if (lastDotIndex !== -1) {
+      return cleanPath.substring(0, lastDotIndex);
+    }
+    return cleanPath;
+  } catch (e) {
+    console.error('[cloudinary] Failed to parse public_id from URL:', url, e);
+    return '';
+  }
+}
+

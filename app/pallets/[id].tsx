@@ -16,7 +16,8 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { BlurView } from 'expo-blur';
-import { Colors, Spacing, Radius, Shadows } from '../../constants/theme';
+import { Spacing, Radius, Shadows, AppColors } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -33,6 +34,8 @@ export default function PalletScanner() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { Colors } = useTheme();
+  const styles = makeStyles(Colors);
   const [permission, requestPermission] = useCameraPermissions();
   const [torch, setTorch] = useState(false);
   const [showList, setShowList] = useState(false);
@@ -333,7 +336,8 @@ export default function PalletScanner() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(Colors: AppColors) {
+  return StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   camera: { flex: 1 },
   flashOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: '#fff', zIndex: 30 },
@@ -395,13 +399,14 @@ const styles = StyleSheet.create({
 
   scannedListContainer: { position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 40, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden' },
   listBlur: { flex: 1 },
-  listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1 },
-  listTitle: { fontSize: 18, fontWeight: '800' },
+  listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: Colors.cardBorder },
+  listTitle: { fontSize: 18, fontWeight: '800', color: Colors.textPrimary },
   listClose: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   scanItem: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 16, marginBottom: 8, gap: 12 },
   statusLine: { width: 4, height: '70%', borderRadius: 2 },
   scanItemContent: { flex: 1 },
-  scanHbl: { fontSize: 15, fontWeight: '700' },
-  scanTracking: { fontSize: 12, fontWeight: '500' },
-  scanDetails: { fontSize: 12, marginTop: 2 },
+  scanHbl: { fontSize: 15, fontWeight: '700', color: Colors.textPrimary },
+  scanTracking: { fontSize: 12, fontWeight: '500', color: Colors.textSecondary },
+  scanDetails: { fontSize: 12, marginTop: 2, color: Colors.textMuted },
 });
+}

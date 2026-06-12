@@ -9,7 +9,7 @@ import {
   markStopStatus, 
   markPhotoUploaded 
 } from './delivery-db';
-import { uploadToCloudinary } from './cloudinary';
+import { uploadToCloudinary, getCloudinaryPublicId } from './cloudinary';
 import api from './api';
 
 const BACKGROUND_SYNC_TASK = 'background-delivery-sync';
@@ -34,6 +34,12 @@ TaskManager.defineTask(BACKGROUND_SYNC_TASK, async () => {
 // 2. Export registration function
 export async function registerBackgroundSync() {
   try {
+    const Constants = require('expo-constants').default;
+    if (Constants.appOwnership === 'expo') {
+      console.log('[delivery-sync] Skipping background task registration in Expo Go.');
+      return;
+    }
+
     const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_SYNC_TASK);
     if (!isRegistered) {
       console.log(`[delivery-sync] Registering task ${BACKGROUND_SYNC_TASK}...`);
@@ -109,6 +115,10 @@ export async function syncPendingDeliveries(): Promise<{
 
         const photoUrlsResults = await Promise.all(photoSyncPromises);
         const validPhotoUrls = photoUrlsResults.filter((url): url is string => !!url);
+        const photoObjects = validPhotoUrls.map((url) => ({
+          url,
+          public_id: getCloudinaryPublicId(url),
+        }));
 
         // --- 3. Backend Sync (Idempotent) ---
         const result = await api.delivery.syncStop({
@@ -116,7 +126,7 @@ export async function syncPendingDeliveries(): Promise<{
           latitude: stop.latitude,
           longitude: stop.longitude,
           accuracy: stop.accuracy,
-          photos: validPhotoUrls,
+          photos: photoObjects,
           hbls: stop.scans.map((s) => s.hbl),
         });
 

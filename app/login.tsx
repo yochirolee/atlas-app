@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLoginMutation } from '../hooks/useAuth';
-import { Colors, Spacing, Radius } from '../constants/theme';
+import { Spacing, Radius, AppColors } from '../constants/theme';
+import { useTheme } from '../hooks/useTheme';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -16,6 +17,8 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const loginMutation = useLoginMutation();
+  const { Colors } = useTheme();
+  const styles = makeStyles(Colors);
   
   const { control, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -95,7 +98,8 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(Colors: AppColors) {
+  return StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
@@ -132,6 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     padding: 16,
     fontSize: 16,
+    color: Colors.textPrimary,
     borderWidth: 1,
     borderColor: Colors.cardBorder,
     backgroundColor: Colors.hoverLight,
@@ -161,3 +166,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 });
+}

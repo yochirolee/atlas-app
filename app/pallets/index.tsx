@@ -12,7 +12,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Colors, Spacing, Radius, Shadows } from '../../constants/theme';
+import { Spacing, Radius, Shadows, AppColors } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 import api from '../../services/api';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -20,6 +21,8 @@ export default function PalletList() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { Colors } = useTheme();
+  const styles = makeStyles(Colors);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['pallets'],
@@ -132,7 +135,8 @@ export default function PalletList() {
   );
 }
 
-const styles = StyleSheet.create({
+function makeStyles(Colors: AppColors) {
+  return StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.bg },
   header: {
     flexDirection: 'row',
@@ -160,6 +164,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: Radius.sm,
     marginBottom: 10,
+    backgroundColor: Colors.card,
     ...Shadows.subtle,
   },
   palletIconWrap: {
@@ -171,7 +176,7 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
   palletInfo: { flex: 1 },
-  palletTitle: { fontSize: 16, fontWeight: '700' },
+  palletTitle: { fontSize: 16, fontWeight: '700', color: Colors.textPrimary },
   statusBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -187,7 +192,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 2,
   },
-  palletSub: { fontSize: 13, marginTop: 4 },
+  palletSub: { fontSize: 13, marginTop: 4, color: Colors.textSecondary },
   fab: {
     position: 'absolute',
     bottom: 32,
@@ -200,3 +205,4 @@ const styles = StyleSheet.create({
     ...Shadows.elevated,
   },
 });
+}

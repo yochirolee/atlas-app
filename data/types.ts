@@ -1,16 +1,16 @@
 import { z } from "zod";
 
 export const agencySchema = z.object({
-  id: z.number().optional(),
-  name: z.string(),
+   id: z.number().optional(),
+   name: z.string(),
 });
 export type Agency = z.infer<typeof agencySchema>;
 
 export const userSchema = z.object({
-  id: z.number().optional(),
-  email: z.string().email(),
-  name: z.string(),
-  agency_id: z.number().optional(),
+   id: z.number().optional(),
+   email: z.string().email(),
+   name: z.string(),
+   agency_id: z.number().optional(),
 });
 export type User = z.infer<typeof userSchema>;
 
@@ -33,23 +33,39 @@ export type ShippingLine = any;
 
 // Tracking / Packages
 export interface TrackingEvent {
-   locationId: number;
-   updatedAt: string;
-   location: string;
+   locationId?: number;
+   updatedAt?: string;
+   timestamp?: string;
+   created_at?: string;
+   location?: string | null;
+   status?: string;
+   statusCode?: string;
+   statusName?: string;
+   status_details?: string;
+   statusDescription?: string;
+   notes?: string | null;
 }
 
 export interface TrackingParcel {
    hbl: string;
+   tracking_number?: string;
    weight: string;
    description: string;
+   status?: string;
    events: TrackingEvent[];
    photos?: string[];
+   latitude?: string | number;
+   longitude?: string | number;
 }
 
 export interface TrackingResponse {
-   invoiceId: number;
+   invoiceId?: number;
+   orderId?: number;
+   order_id?: number;
    agency: string;
    province: string | { name: string };
    city: string | { name: string };
+   status?: string;
+   weight?: string;
    parcels: TrackingParcel[];
 }

@@ -1,53 +1,105 @@
 /**
- * Uber-inspired Design System
- * Static theme constants
+ * ATLAS Design System — Dual Theme
+ * DarkColors: dark navy theme (default)
+ * LightColors: clean light blue-gray theme
  */
 
-export const Colors = {
-  // Core surfaces
-  bg: '#FFFFFF',
-  surface: '#FFFFFF',
-  card: '#FFFFFF',
-  cardBorder: '#EFEFEF',
-  elevated: '#F3F3F3',
+// ─── Dark Theme ──────────────────────────────────────────────────────────────
+export const DarkColors = {
+  // Core surfaces (layered dark)
+  bg: '#0D0F14',
+  surface: '#161920',
+  card: '#1E2230',
+  cardBorder: '#2A2F42',
+  elevated: '#252B3B',
 
-  // Primary brand
-  primary: '#000000',       // Uber Black
-  primaryText: '#FFFFFF',   // Text on primary surfaces
+  // Primary brand — vivid blue CTA
+  primary: '#2563EB',
+  primaryText: '#FFFFFF',
 
   // Interactive states
-  chipBg: '#EFEFEF',
-  hoverGray: '#E2E2E2',
-  hoverLight: '#F3F3F3',
+  chipBg: '#252B3B',
+  hoverGray: '#2A2F42',
+  hoverLight: '#1E2230',
 
   // Semantic status colors
-  green: '#10B981',
-  greenDim: 'rgba(16,185,129,0.10)',
+  green: '#22C55E',
+  greenDim: 'rgba(34,197,94,0.15)',
   amber: '#F59E0B',
-  amberDim: 'rgba(245,158,11,0.10)',
+  amberDim: 'rgba(245,158,11,0.15)',
   red: '#EF4444',
-  redDim: 'rgba(239,68,68,0.10)',
+  redDim: 'rgba(239,68,68,0.15)',
   purple: '#8B5CF6',
-  purpleDim: 'rgba(139,92,246,0.10)',
+  purpleDim: 'rgba(139,92,246,0.15)',
 
   // Text hierarchy
-  textPrimary: '#000000',
-  textSecondary: '#4B4B4B',
-  textMuted: '#AFAFAF',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#A0A8C0',
+  textMuted: '#5A6380',
+
+  // Tab bar
+  tabBar: '#161920',
+  tabBarBorder: '#2A2F42',
+
+  // Shadows
+  shadowColor: 'rgba(0,0,0,0.40)',
+
+  // Legacy aliases
+  cyan: '#2563EB',
+  cyanLight: '#3B7FFF',
+  cyanDim: 'rgba(37,99,235,0.12)',
+  cyanBorder: 'rgba(37,99,235,0.25)',
+};
+
+// ─── Light Theme ─────────────────────────────────────────────────────────────
+export const LightColors = {
+  // Core surfaces
+  bg: '#F0F4FF',
+  surface: '#FFFFFF',
+  card: '#FFFFFF',
+  cardBorder: '#E2E8F0',
+  elevated: '#F8FAFC',
+
+  // Primary brand — same vivid blue
+  primary: '#2563EB',
+  primaryText: '#FFFFFF',
+
+  // Interactive states
+  chipBg: '#EEF2FF',
+  hoverGray: '#E2E8F0',
+  hoverLight: '#F8FAFC',
+
+  // Semantic status colors
+  green: '#16A34A',
+  greenDim: 'rgba(22,163,74,0.10)',
+  amber: '#D97706',
+  amberDim: 'rgba(217,119,6,0.10)',
+  red: '#DC2626',
+  redDim: 'rgba(220,38,38,0.10)',
+  purple: '#7C3AED',
+  purpleDim: 'rgba(124,58,237,0.10)',
+
+  // Text hierarchy
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#94A3B8',
 
   // Tab bar
   tabBar: '#FFFFFF',
-  tabBarBorder: '#EFEFEF',
+  tabBarBorder: '#E2E8F0',
 
   // Shadows
-  shadowColor: 'rgba(0, 0, 0, 0.12)',
+  shadowColor: 'rgba(0,0,0,0.08)',
 
   // Legacy aliases
-  cyan: '#000000',
-  cyanLight: '#333333',
-  cyanDim: 'rgba(0, 0, 0, 0.06)',
-  cyanBorder: 'rgba(0, 0, 0, 0.12)',
+  cyan: '#2563EB',
+  cyanLight: '#3B7FFF',
+  cyanDim: 'rgba(37,99,235,0.08)',
+  cyanBorder: 'rgba(37,99,235,0.20)',
 };
+
+// Default static export for files that haven't migrated to useTheme() yet
+export const Colors = DarkColors;
 
 export const Fonts = {
   heading: 'System',
@@ -94,3 +146,5 @@ export const Shadows = {
     elevation: 2,
   },
 };
+
+export type AppColors = typeof DarkColors;

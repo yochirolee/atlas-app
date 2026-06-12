@@ -32,7 +32,8 @@ const createAgencyFormSchema = z.object({
 export type CreateAgencyFormSchema = z.infer<typeof createAgencyFormSchema>;
 const isDev = process.env.NODE_ENV === "development";
 const config = {
-   baseURL: process.env.EXPO_PUBLIC_API_URL || (isDev ? 'http://192.168.1.158:3000/api/v1' : 'https://api.ctenvios.com/api/v1'),
+   baseURL:
+      process.env.EXPO_PUBLIC_API_URL || (isDev ? "http://10.1.10.214:3000/api/v1" : "https://api.ctenvios.com/api/v1"),
    headers: { "Content-Type": "application/json" },
 };
 console.log("API Base URL:", config.baseURL);
@@ -80,10 +81,8 @@ axiosInstance.interceptors.response.use(
 
 const api = {
    tracking: {
-      lookup: async (order_id: string) => {
-         const response = await axiosInstance.get('/tracking/lookup', {
-            params: { order_id },
-         });
+      lookup: async (tracking_number: string) => {
+         const response = await axiosInstance.get(`/parcels/${tracking_number}/tracking`);
          return response.data;
       },
    },
@@ -736,17 +735,17 @@ const api = {
       },
    },
    delivery: {
-     syncStop: async (data: {
-       local_id: string;
-       latitude: number | null;
-       longitude: number | null;
-       accuracy: number | null;
-       photos: string[];
-       hbls: string[];
-     }) => {
-       const response = await axiosInstance.post('/delivery/stops/sync', data);
-       return response.data;
-     },
+      syncStop: async (data: {
+         local_id: string;
+         latitude: number | null;
+         longitude: number | null;
+         accuracy: number | null;
+         photos: { url: string; public_id: string }[];
+         hbls: string[];
+      }) => {
+         const response = await axiosInstance.post("/delivery/stops/sync", data);
+         return response.data;
+      },
    },
    pallets: {
       get: async (page: number | 0, limit: number | 25) => {
@@ -1039,6 +1038,10 @@ const api = {
          const response = await axiosInstance.patch(`/parcels/${encodeURIComponent(hbl)}/status`, {
             status: parcel.status,
          });
+         return response.data;
+      },
+      tracking: async (hbl: string) => {
+         const response = await axiosInstance.get(`/parcels/${hbl}/tracking`);
          return response.data;
       },
    },

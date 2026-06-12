@@ -8,11 +8,14 @@ import { useEffect } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '../lib/query-client';
 import { useAppStore } from '../stores/app-store';
-
+import { registerBackgroundSync } from '../services/delivery-sync';
+import { initDeliveryListeners } from '../services/delivery-listeners';
+import { StatusBar } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
-// Keep the splash screen visible while we fetch resources or wait for navigation
-SplashScreen.preventAutoHideAsync();
+// Keep the splash screen visible while we fetch resources or wait for navigation.
+// Rejections are expected in Expo Go / after JS reloads (no native splash registered).
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { session } = useAppStore();
@@ -32,9 +35,9 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
       } else if (session && inAuthGroup) {
         router.replace('/');
       }
-      
+
       // Hide the splash screen once navigation is ready and redirected
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync().catch(() => {});
     }, 1);
 
     return () => clearTimeout(timer);
@@ -47,11 +50,10 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-import { registerBackgroundSync } from '../services/delivery-sync';
-import { initDeliveryListeners } from '../services/delivery-listeners';
-import { StatusBar } from 'react-native';
 
 export default function RootLayout() {
+  const isDarkMode = useAppStore((state) => state.isDarkMode);
+
   useEffect(() => {
     registerBackgroundSync();
     const cleanup = initDeliveryListeners();
@@ -61,9 +63,13 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthGuard>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={isDarkMode ? '#0D0F14' : '#F0F4FF'}
+        />
         <Slot />
       </AuthGuard>
     </QueryClientProvider>
   );
 }
+

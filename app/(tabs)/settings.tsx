@@ -1,18 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors, Spacing, Radius, Shadows } from '../../constants/theme';
 import { useRouter } from 'expo-router';
 import { Alert, Linking } from 'react-native';
 import { useLogOut, useDeleteAccount } from '../../hooks/useAuth';
 import { useAppStore } from '../../stores/app-store';
+import { useTheme } from '../../hooks/useTheme';
+import { Spacing, Radius } from '../../constants/theme';
 
 export default function SettingsScreen() {
   const logoutMutation = useLogOut();
   const deleteAccountMutation = useDeleteAccount();
-  const { user } = useAppStore();
+  const { user, isDarkMode, toggleTheme } = useAppStore();
   const router = useRouter();
+  const { Colors } = useTheme();
 
   const handleLogout = () => {
     logoutMutation.mutate();
@@ -30,18 +32,16 @@ export default function SettingsScreen() {
       'Are you absolutely sure? This action is permanent and cannot be undone. All your data will be cleared.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete Permanently', 
+        {
+          text: 'Delete Permanently',
           style: 'destructive',
-          onPress: () => deleteAccountMutation.mutate()
-        }
+          onPress: () => deleteAccountMutation.mutate(),
+        },
       ]
     );
   };
 
-  const navigateToProfile = () => {
-    router.push('/profile');
-  };
+  const styles = makeStyles(Colors);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -50,9 +50,9 @@ export default function SettingsScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        
-        {/* User Summary Header */}
-        <TouchableOpacity style={styles.userSummary} onPress={navigateToProfile}>
+
+        {/* User Summary */}
+        <TouchableOpacity style={styles.userSummary} onPress={() => router.push('/profile' as any)}>
           <View style={styles.avatarCircle}>
             <Text style={styles.avatarInitial}>
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
@@ -65,12 +65,32 @@ export default function SettingsScreen() {
           <Ionicons name="chevron-forward" size={20} color={Colors.textMuted} />
         </TouchableOpacity>
 
-       
-
+        {/* Preferences */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Preferences</Text>
-          
-          <TouchableOpacity style={styles.cardItem }>
+
+          {/* Theme Toggle */}
+          <View style={styles.cardItem}>
+            <View style={[styles.cardIconWrap, { backgroundColor: isDarkMode ? Colors.elevated : Colors.chipBg }]}>
+              <Ionicons
+                name={isDarkMode ? 'moon' : 'sunny'}
+                size={20}
+                color={isDarkMode ? Colors.purple : Colors.amber}
+              />
+            </View>
+            <View style={styles.themeTextWrap}>
+              <Text style={styles.cardItemText}>Theme</Text>
+              <Text style={styles.themeSubText}>{isDarkMode ? 'Dark' : 'Light'}</Text>
+            </View>
+            <Switch
+              value={isDarkMode}
+              onValueChange={toggleTheme}
+              trackColor={{ false: Colors.cardBorder, true: Colors.primary }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
+
+          <TouchableOpacity style={styles.cardItem}>
             <View style={styles.cardIconWrap}>
               <Ionicons name="notifications" size={20} color={Colors.textPrimary} />
             </View>
@@ -79,9 +99,10 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Support & Privacy */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Support & Privacy</Text>
-          
+
           <TouchableOpacity style={styles.cardItem} onPress={handlePrivacyPolicy}>
             <View style={styles.cardIconWrap}>
               <Ionicons name="shield-checkmark" size={20} color={Colors.textPrimary} />
@@ -99,11 +120,11 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-       
+        {/* Account */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
-          <TouchableOpacity 
-            style={[styles.cardItem, styles.logoutItem]} 
+          <TouchableOpacity
+            style={[styles.cardItem, styles.logoutItem]}
             onPress={handleLogout}
             disabled={logoutMutation.isPending}
           >
@@ -116,17 +137,15 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </View>
 
-        
-
-         <View style={styles.section}>
+        {/* Danger Zone */}
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>Danger Zone</Text>
-
-          <TouchableOpacity 
-            style={[styles.cardItem]} 
+          <TouchableOpacity
+            style={styles.cardItem}
             onPress={handleDeleteAccount}
             disabled={deleteAccountMutation.isPending}
           >
-            <View style={[styles.cardIconWrap, { backgroundColor: 'rgba(239, 68, 68, 0.05)' }]}>
+            <View style={[styles.cardIconWrap, { backgroundColor: Colors.redDim }]}>
               <Ionicons name="trash-outline" size={20} color={Colors.red} />
             </View>
             <Text style={[styles.cardItemText, { color: Colors.red }]}>
@@ -140,105 +159,118 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  scrollContent: {
-    paddingBottom: 40,
-  },
-  header: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    letterSpacing: -0.5,
-    color: Colors.textPrimary,
-  },
-  userSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    marginHorizontal: Spacing.md,
-    backgroundColor: Colors.card,
-    borderRadius: Radius.md,
-    ...Shadows.card,
-    marginTop: 8,
-  },
-  avatarCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: Colors.elevated,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarInitial: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-  },
-  userSummaryText: {
-    flex: 1,
-    marginLeft: 16,
-  },
-  userName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.textPrimary,
-  },
-  userEmail: {
-    fontSize: 14,
-    color: Colors.textMuted,
-    marginTop: 2,
-  },
-  section: {
-    marginTop: 24,
-    paddingHorizontal: Spacing.md,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    color: Colors.textMuted,
-    marginLeft: 4,
-  },
-  cardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: Radius.sm,
-    backgroundColor: Colors.card,
-    marginBottom: 8,
-    ...Shadows.subtle,
-  },
-  cardIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: Radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.elevated,
-  },
-  cardItemText: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 12,
-    color: Colors.textPrimary,
-  },
-  logoutItem: {
-    marginTop: 12,
-  },
-  logoutIconWrap: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-  },
-  logoutText: {
-    color: Colors.red,
-  },
-});
+function makeStyles(Colors: any) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors.bg,
+    },
+    scrollContent: {
+      paddingBottom: 40,
+    },
+    header: {
+      paddingHorizontal: Spacing.md,
+      paddingVertical: Spacing.md,
+    },
+    headerTitle: {
+      fontSize: 28,
+      fontWeight: '700',
+      letterSpacing: -0.5,
+      color: Colors.textPrimary,
+    },
+    userSummary: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 20,
+      marginHorizontal: Spacing.md,
+      backgroundColor: Colors.card,
+      borderRadius: Radius.md,
+      borderWidth: 1,
+      borderColor: Colors.cardBorder,
+      marginTop: 8,
+    },
+    avatarCircle: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: Colors.cyanDim,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    avatarInitial: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: Colors.primary,
+    },
+    userSummaryText: {
+      flex: 1,
+      marginLeft: 16,
+    },
+    userName: {
+      fontSize: 17,
+      fontWeight: '700',
+      color: Colors.textPrimary,
+    },
+    userEmail: {
+      fontSize: 13,
+      color: Colors.textMuted,
+      marginTop: 2,
+    },
+    section: {
+      marginTop: 24,
+      paddingHorizontal: Spacing.md,
+    },
+    sectionTitle: {
+      fontSize: 11,
+      fontWeight: '700',
+      marginBottom: 8,
+      textTransform: 'uppercase',
+      letterSpacing: 1.2,
+      color: Colors.textMuted,
+      marginLeft: 4,
+    },
+    cardItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 14,
+      borderRadius: Radius.sm,
+      backgroundColor: Colors.card,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: Colors.cardBorder,
+    },
+    cardIconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: Radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: Colors.elevated,
+    },
+    cardItemText: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: '500',
+      marginLeft: 12,
+      color: Colors.textPrimary,
+    },
+    themeTextWrap: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    themeSubText: {
+      fontSize: 12,
+      color: Colors.textMuted,
+      marginTop: 1,
+    },
+    logoutItem: {
+      marginTop: 0,
+    },
+    logoutIconWrap: {
+      backgroundColor: Colors.redDim,
+    },
+    logoutText: {
+      color: Colors.red,
+    },
+  });
+}

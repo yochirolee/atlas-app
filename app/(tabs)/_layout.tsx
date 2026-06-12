@@ -1,22 +1,18 @@
 import { Tabs, useRootNavigationState } from 'expo-router';
 import { Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../../constants/theme';
+import { useTheme } from '../../hooks/useTheme';
 
 export const unstable_settings = {
   initialRouteName: 'index',
 };
 
-
 export default function TabLayout() {
   const rootNavigationState = useRootNavigationState();
+  const { Colors } = useTheme();
 
-  // STABILIZATION: Prevent the TabRouter from attempting to access a 'stale' 
-  // navigation state before the root navigator has finished mounting.
   if (!rootNavigationState?.key) return null;
 
-  // We rely on the Root Layout's splash screen logic and AuthGuard to ensure
-  // that the navigator mounts correctly without blocking the render.
   return (
     <Tabs
       screenOptions={{
@@ -27,14 +23,15 @@ export default function TabLayout() {
           backgroundColor: Colors.tabBar,
           borderTopColor: Colors.tabBarBorder,
           borderTopWidth: 1,
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 8,
+          height: Platform.OS === 'ios' ? 88 : 68,
+          paddingBottom: Platform.OS === 'ios' ? 24 : 10,
           paddingTop: 8,
           elevation: 0,
+          shadowOpacity: 0,
         },
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: '500',
+          fontWeight: '600',
           marginTop: -2,
         },
       }}
@@ -67,15 +64,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="finance"
-        options={{
-          title: 'Finance',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'wallet' : 'wallet-outline'} size={22} color={color} />
-          ),
-        }}
-      />
+    
       <Tabs.Screen
         name="settings"
         options={{
